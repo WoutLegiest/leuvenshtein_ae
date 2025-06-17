@@ -6,8 +6,8 @@ use tfhe::shortint::parameters::*;
 
 use std::time::Instant;
 
-/* 
-    
+/*
+
     Code for doing the unencrypted precomputation of the Levenshtein distance
     Results used in paper
 
@@ -49,44 +49,42 @@ fn gen_vec_1eq() -> Vec<u64> {
 }
 
 fn levenshtein_plain(x: &str, y: &str) -> Vec<u32> {
-  let xlen = x.len();
-  let ylen = y.len();
+    let xlen = x.len();
+    let ylen = y.len();
 
-  let str1 = x.bytes().collect::<Vec<u8>>();
-  let str2 = y.bytes().collect::<Vec<u8>>();
+    let str1 = x.bytes().collect::<Vec<u8>>();
+    let str2 = y.bytes().collect::<Vec<u8>>();
 
-  let vec_size = std::cmp::max(xlen + 1 as usize, ylen + 1 as usize);
-  let mut current: Vec<u32> = Vec::with_capacity(vec_size);
-  let mut prev: Vec<u32> = Vec::with_capacity(vec_size);
+    let vec_size = std::cmp::max(xlen + 1 as usize, ylen + 1 as usize);
+    let mut current: Vec<u32> = Vec::with_capacity(vec_size);
+    let mut prev: Vec<u32> = Vec::with_capacity(vec_size);
 
-  for i in 0..vec_size {
-      current.push(0u32);
-      prev.push(i as u32);
-  }
+    for i in 0..vec_size {
+        current.push(0u32);
+        prev.push(i as u32);
+    }
 
-  for j in 0..ylen {
-      current[0] = (j + 1) as u32;
+    for j in 0..ylen {
+        current[0] = (j + 1) as u32;
 
-      for i in 0..xlen {
-          let ins = current[i] + 1;
-          let dlt = prev[i + 1] + 1;
-          let mut sub = prev[i];
-          if str1[i] != str2[j] {
-              sub += 1;
-          }
+        for i in 0..xlen {
+            let ins = current[i] + 1;
+            let dlt = prev[i + 1] + 1;
+            let mut sub = prev[i];
+            if str1[i] != str2[j] {
+                sub += 1;
+            }
 
-          current[i + 1] = std::cmp::min(std::cmp::min(dlt, ins), sub);
-      }
-      mem::swap(&mut current, &mut prev);
-  }
-  prev
+            current[i + 1] = std::cmp::min(std::cmp::min(dlt, ins), sub);
+        }
+        mem::swap(&mut current, &mut prev);
+    }
+    prev
 
-  // anwser sits in previous[vec_size]
+    // anwser sits in previous[vec_size]
 }
 
-
 fn main() {
-
     // length 8
     let x = "abcdefgh";
     let y = "adcdefgf";
@@ -118,20 +116,20 @@ fn main() {
     // Encryption of the input strings
     let scale_factor: u8 = 0; // You can put it to 64
 
-    let mut x_enc = x
-        .bytes() // convert char to int
-        .map(|c| cks.encrypt((c - scale_factor) as u64)) // Encrypts
-        .collect::<Vec<tfhe::shortint::Ciphertext>>();
+    // let mut x_enc = x
+    // .bytes() // convert char to int
+    // .map(|c| cks.encrypt((c - scale_factor) as u64)) // Encrypts
+    // .collect::<Vec<tfhe::shortint::Ciphertext>>();
 
     let mut y_enc = y
         .bytes() // convert char to int
         .map(|c| cks.encrypt((c - scale_factor) as u64)) // Encrypts
         .collect::<Vec<tfhe::shortint::Ciphertext>>();
 
-    let mut x2_enc = x
-        .bytes() // convert char to int
-        .map(|c| cks.encrypt(((c - scale_factor) >> 4) as u64)) // Encrypts
-        .collect::<Vec<tfhe::shortint::Ciphertext>>();
+    // let mut x2_enc = x
+    //     .bytes() // convert char to int
+    //     .map(|c| cks.encrypt(((c - scale_factor) >> 4) as u64)) // Encrypts
+    //     .collect::<Vec<tfhe::shortint::Ciphertext>>();
 
     let mut y2_enc = y
         .bytes() // convert char to int
@@ -165,13 +163,12 @@ fn main() {
     }
 
     // Preprocessing part
-    let mut ascii_collection = (0..127).collect::<Vec<u8>>();
+    let ascii_collection = (0..127).collect::<Vec<u8>>();
     let mut peq = HashMap::new();
 
     let t_pre = Instant::now();
 
     for i in ascii_collection {
-
         let mut ch_low = cks.encrypt((i & 15) as u64);
         let mut ch_high = cks.encrypt((i >> 4) as u64);
 
@@ -180,7 +177,6 @@ fn main() {
         for j in 0..n {
             let lut_1eq = sks.generate_lookup_table(|x| lut_vec_1eq[x as usize]);
             let lut_eq = sks.generate_lookup_table(|x| lut_vec_eq[x as usize]);
-
 
             // Check the first part of the character
             let mut eq1 = sks.unchecked_sub(&mut ch_low, &mut y_enc[j]);
@@ -197,7 +193,7 @@ fn main() {
             sks.unchecked_add_assign(&mut eq2, &eq1);
 
             sks.apply_lookup_table_assign(&mut eq2, &lut_eq);
-            
+
             ctxt_vec.push(eq2.clone());
         }
 
@@ -208,23 +204,18 @@ fn main() {
     println!("Pre-time: {elapsed}");
 
     // Determine threshold
-    let th = m/2.0 as usize;     
+    let th = m / 2.0 as usize;
     // let th = f64::ceil(m as f64 * 0.25) as usize;
 
     // Disable the threshold
-    // let th = m+2; 
-
-    let mut count = 0;
+    // let th = m+2;
 
     let start = Instant::now();
 
     for i in 1..xlen {
-      let t = Instant::now();
+        let t = Instant::now();
         for j in 1..ylen {
-            if usize::abs_diff(i ,j) <= th {
-
-                let t = Instant::now();
-
+            if usize::abs_diff(i, j) <= th {
                 let eq2 = peq.get(&(x.as_bytes()[i - 1] as u8)).unwrap()[j - 1].clone();
 
                 let vin = v_matrix[i][j - 1].clone();
@@ -244,8 +235,6 @@ fn main() {
 
                 v_matrix[i][j] = sks.unchecked_sub(&ct_res, &hin);
                 h_matrix[i][j] = sks.unchecked_sub(&ct_res, &vin);
-
-                count += 1;
             }
         }
         let elapsed = t.elapsed().as_secs_f64();
@@ -265,7 +254,7 @@ fn main() {
             let v_dec: u64 = cks.decrypt(&v_matrix[i][j]);
             v_dec_row.push(v_dec);
         }
-        
+
         h_dec.push(h_dec_row);
         v_dec.push(v_dec_row);
     }
@@ -284,11 +273,10 @@ fn main() {
     // score += m as u64;
     let t_el = start.elapsed().as_secs_f32();
 
-
     // Diagonal score
     let mut diag_score = 0;
 
-    for i in 1..m+1{
+    for i in 1..m + 1 {
         if h_dec[i][i] > 8 {
             diag_score += &h_dec[i][i] - 16;
         } else {
@@ -297,20 +285,18 @@ fn main() {
     }
 
     for i in 0..m {
-        if v_dec[i+1][i] > 8 {
-            diag_score += &v_dec[i+1][i] - 16;
+        if v_dec[i + 1][i] > 8 {
+            diag_score += &v_dec[i + 1][i] - 16;
         } else {
-            diag_score += &v_dec[i+1][i];
+            diag_score += &v_dec[i + 1][i];
         }
     }
 
-
     let prev_vec = levenshtein_plain(&x, &y);
     println!("Outcome of the plain Levenshtein distance: {}", prev_vec[m]);
-    
+
     println!("Outcome of the Leuvenshtein distance: {}", diag_score);
     println!("Threshold: {th}");
 
     println!("Leuvenshtein Timing: {}", t_el);
-
 }
