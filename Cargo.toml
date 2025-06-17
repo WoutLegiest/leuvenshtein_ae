@@ -1,0 +1,22 @@
+[package]
+name = "leuvenshtein_mcu"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+default-run = "leuvenshtein"
+
+[dependencies]
+tfhe = { version = "0.7.2", features = [
+  "integer",
+  "boolean",
+  "shortint",
+  "x86_64-unix",
+] }
+
+[[bin]]
+name = "leuvenshtein"
+path = "src/main.rs"
+
+[[bin]]
+name = "leuvenshtein_preprocess"
+path = "src/main_prepros.rs"

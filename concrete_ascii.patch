@@ -1,0 +1,42 @@
+diff --git a/frontends/concrete-python/examples/levenshtein_distance/levenshtein_distance.py b/frontends/concrete-python/examples/levenshtein_distance/levenshtein_distance.py
+index c31d12a8..fb4a9458 100644
+--- a/frontends/concrete-python/examples/levenshtein_distance/levenshtein_distance.py
++++ b/frontends/concrete-python/examples/levenshtein_distance/levenshtein_distance.py
+@@ -38,6 +38,11 @@ class Alphabet:
+     def name():
+         """Set alphabet for family names"""
+         return Alphabet.lowercase() + Alphabet.uppercase() + Alphabet("-. ")
++    
++    @staticmethod
++    def ascii():
++        """Set alphabet for family names"""
++        return Alphabet("".join([chr(i) for i in range(128)]))
+ 
+     @staticmethod
+     def dna():
+@@ -57,7 +62,7 @@ class Alphabet:
+     @staticmethod
+     def return_available_alphabets() -> list:
+         """Return available alphabets."""
+-        return ["string", "STRING", "StRiNg", "ACTG", "name"]
++        return ["string", "STRING", "StRiNg", "ACTG", "name", "ascii"]
+ 
+     @staticmethod
+     def init_by_name(alphabet_name: str) -> "Alphabet":
+@@ -73,6 +78,8 @@ class Alphabet:
+             return Alphabet.name()
+         if alphabet_name == "ACTG":
+             return Alphabet.dna()
++        if alphabet_name == "ascii":
++            return Alphabet.ascii()
+ 
+         raise ValueError(f"Unknown alphabet {alphabet_name}")
+ 
+@@ -120,6 +127,7 @@ class Alphabet:
+         return tuple(self.mapping_to_int[si] for si in string)
+ 
+ 
++
+ class LevenshteinDistance:
+     alphabet: Alphabet
+     max_string_length: int
