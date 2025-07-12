@@ -6,12 +6,11 @@ rust-version = "1.80"
 default-run = "leuvenshtein"
 
 [dependencies]
-tfhe = { version = "0.7.2", features = [
-  "integer",
-  "boolean",
-  "shortint",
-  "x86_64-unix",
-] }
+
+[target.'cfg(target_arch = "x86_64")'.dependencies]
+tfhe = { version = "0.7.2", features = ["integer","boolean","shortint","x86_64-unix",] }
+[target.'cfg(target_arch = "aarch64")'.dependencies]
+tfhe = { version = "0.7.2", features = ["integer","boolean","shortint","aarch64-unix",] }
 
 [[bin]]
 name = "leuvenshtein"

@@ -17,7 +17,7 @@ The project is run using rustc v1.80. To install this specific rust version with
 The programs can now be run with
 
 - `cargo run --release` to run the main algorithm
-- `cargo run --release --bin leuvenshtein_prepross` to run the preprocessing variant
+- `cargo run --release --bin leuvenshtein_preprocess` to run the preprocessing variant
 
 ## Select size
 
@@ -30,7 +30,7 @@ At the start of the main function -- `fn main()` -- you can select the input str
 - Clone the correct Concrete version
   `git clone https://github.com/zama-ai/concrete ; cd concrete ; git reset --hard fd9db128869818293d3b4336f44e5938cfe5c480`
 - Copy the patch file to the folder and apply our patch to the repo:
-  `git apply concrete_ascii.patch`
+  `git apply ../concrete_ascii.patch`
 - Go to Levenshtein distance folder:
   `cd frontends/concrete-python/examples/levenshtein_distance/`
 - Run the wanted size of concrete instance
