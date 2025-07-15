@@ -8,11 +8,7 @@ First, install Rust; [https://www.rust-lang.org/tools/install](https://www.rust-
 The project is run using rustc v1.80. To install this specific rust version with
 `rustup install 1.80.0`
 
-- Make a temp directory and go to that directory
-- Run `cargo init`; this will initialise a rust project
-- Overwrite the `Cargo.toml` file with the one found in this repository
-- Overwrite the main file, located at `src/main.rs`, with the one found in this repository
-- Add the `main_prepros.rs` file to the `src` folder
+- Clone this git repo: `git clone https://github.com/WoutLegiest/leuvenshtein_ae`
 
 The programs can now be run with
 
